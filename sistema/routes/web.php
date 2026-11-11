@@ -1,7 +1,9 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CategoryController;
 
-Route::get('/', function () {
-    return view('template/administrador');
-});
+// Que la raíz abra directamente el índice de categorías en lugar de 'inicio'
+Route::get('/', [CategoryController::class, 'index'])->name('inicio');
+
+// Ruta para el CRUD de categorías
+Route::resource('categories', CategoryController::class)->except(['show']);
