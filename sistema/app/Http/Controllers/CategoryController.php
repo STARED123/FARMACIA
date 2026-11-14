@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rule; // Regla unique que ignora un registro
 
 class CategoryController extends Controller
 {
@@ -13,9 +13,11 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = Category::withCount('medicines')
-            ->orderBy('name')->get();
-        return view('categories.index', compact('categories'));
+        // SELECT * FROM categories
+        $categories = Category::all();
+
+        // compact() envía $categories a la vista con el mismo nombre
+        return view('settings.categories.index', compact('categories'));
     }
 
     /**
@@ -23,7 +25,8 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        return view('categories.create');
+        // Muestra el formulario vacío
+        return view('settings.categories.create');
     }
 
     /**
@@ -31,13 +34,16 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        $datos = $request->validate([
+        // Reglas de validación: string('name', 50)->unique()
+        $validated = $request->validate([
             'name' => 'required|max:50|unique:categories',
             'description' => 'nullable|max:255',
-        ], $this->mensajes());
+        ]);
 
-        Category::create($datos);
+        // INSERT INTO categories
+        Category::create($validated);
 
+        // PRG: redirige al listado con un mensaje flash
         return to_route('categories.index')
             ->with('ok', 'Categoría registrada correctamente.');
     }
@@ -47,7 +53,9 @@ class CategoryController extends Controller
      */
     public function edit(Category $category)
     {
-        return view('categories.edit', compact('category'));
+        // Muestra el formulario con los datos actuales
+        // Route model binding: Laravel busca la categoría con el id de la URL
+        return view('settings.categories.edit', compact('category'));
     }
 
     /**
@@ -55,16 +63,19 @@ class CategoryController extends Controller
      */
     public function update(Request $request, Category $category)
     {
-        $datos = $request->validate([
+        // UPDATE: valida, actualiza y redirige
+        $validated = $request->validate([
             'name' => [
                 'required',
                 'max:50',
-                Rule::unique('categories')->ignore($category),
+                // Único, sin contar la categoría que se está editando
+                Rule::unique('categories', 'name')->ignore($category->id),
             ],
             'description' => 'nullable|max:255',
-        ], $this->mensajes());
+        ]);
 
-        $category->update($datos);
+        // UPDATE categories SET ... WHERE id = ?
+        $category->update($validated);
 
         return to_route('categories.index')
             ->with('ok', 'Categoría actualizada correctamente.');
@@ -75,23 +86,9 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
-        if ($category->medicines()->exists()) {
-            return back()->with('error', 'No se puede eliminar: tiene medicamentos registrados.');
-        }
-
+        // DELETE (versión 1, sin verificar)
         $category->delete();
-
         return to_route('categories.index')
             ->with('ok', 'Categoría eliminada correctamente.');
-    }
-
-    private function mensajes(): array
-    {
-        return [
-            'name.required' => 'Escribe el nombre de la categoría.',
-            'name.max' => 'El nombre admite máximo 50 caracteres.',
-            'name.unique' => 'Esa categoría ya está registrada.',
-            'description.max' => 'La descripción admite máximo 255 caracteres.',
-        ];
     }
 }

@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DashboardController;
+use Illuminate\Support\Facades\Route;
 
-// Que la raíz abra directamente el índice de categorías en lugar de 'inicio'
-Route::get('/', [CategoryController::class, 'index'])->name('inicio');
+// Vista raíz del sistema: el dashboard
+Route::get('/', [DashboardController::class, 'index'])->name('dashboard.index');
 
-// Ruta para el CRUD de categorías
-Route::resource('categories', CategoryController::class)->except(['show']);
+// CRUD de categorías: crea 6 rutas (index, create, store, edit, update, destroy)
+Route::resource('categories', CategoryController::class)->except('show');
