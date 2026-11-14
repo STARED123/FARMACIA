@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('medicines', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('categories_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('category_id')->constrained()->restrictOnDelete();
              $table->unsignedInteger('amount');
               $table->decimal('price_unit', 10, 2);
                $table->decimal('subtotal', 10, 2);
