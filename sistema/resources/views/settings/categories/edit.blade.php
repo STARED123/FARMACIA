@@ -1,16 +1,23 @@
-<form action="{{ route('categories.update', $category->id) }}" method="POST">
-    @csrf
-    @method('PUT')
-    
-    <div class="mb-3">
-        <label for="name" class="form-label">Nombre</label>
-        <input type="text" class="form-control" id="name" name="name" value="{{ old('name', $category->name) }}">
-    </div>
-    
-    <div class="mb-3">
-        <label for="description" class="form-label">Descripción</label>
-        <textarea class="form-control" id="description" name="description">{{ old('description', $category->description) }}</textarea>
-    </div>
+@extends('template.administrador')
 
-    <button type="submit" class="btn btn-primary">Actualizar</button>
-</form>
+@section('title', 'CATEGORÍAS')
+@section('name_section', 'CATEGORÍAS')
+@section('description', 'Actualizar categoría')
+@section('item_section', 'Actualizar registro')
+@section('section', 'Categorías')
+@section('module', 'Configuraciones')
+
+@section('content')
+<div class="card bg-white border-0 shadow-sm border-5 border-top border-secondary">
+    <div class="card-body">
+        {{-- PUT /categories/{id} → CategoryController@update --}}
+        <form action="{{ route('categories.update', $category->id) }}" method="POST">
+            @csrf
+            @method('PUT') 
+            
+            {{-- Incluye el formulario compartido que tiene los inputs --}}
+            @include('settings.categories.form')
+        </form>
+    </div>
+</div>
+@endsection
