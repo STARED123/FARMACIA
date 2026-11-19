@@ -62,7 +62,9 @@
             <span class="text-uppercase text-white-50 fw-bold" style="font-size: 11px; letter-spacing: 0.5px;">Configuraciones</span>
         </li>
         <li class="nav-item">
-            <a href="#" class="nav-link sidebar-link text-white-50 rounded-4 px-3 py-2 d-flex align-items-center gap-2">
+            <a href="{{ route('roles.index') }}" 
+               class="nav-link sidebar-link text-white-50 rounded-4 px-3 py-2 d-flex align-items-center gap-2 {{ request()->is(['roles*']) ? 'active_item' : null }}"
+               aria-current="{{ request()->is(['roles*']) ? 'page' : null }}">
                 <i class="bi bi-shield-lock fs-6"></i>
                 <span class="small fw-medium">Roles</span>
             </a>
