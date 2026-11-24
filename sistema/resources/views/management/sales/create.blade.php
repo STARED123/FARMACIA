@@ -21,8 +21,9 @@
                             class="form-select @error('customer_id') is-invalid @enderror">
                         <option value="">-- Seleccione --</option>
                         @foreach ($customers as $customer)
-                            <option value="{{ $customer->id }}" @selected((string) old('customer_id') === (string) $customer->id)>
-                                {{ $customer->name }} - DNI {{ $customer->dni }}
+                            <option value="{{ $customer->id }}"
+                                @selected((string) old('customer_id') === (string) $customer->id)>
+                                {{ $customer->name }} DNI {{ $customer->dni }}
                             </option>
                         @endforeach
                     </select>
@@ -32,20 +33,21 @@
                 </div>
 
                 <div class="col-12 col-md-6 mb-3">
-                    <label for="users_id" class="form-label">Vendedor</label>
-                    <select name="users_id" id="users_id"
-                            class="form-select @error('users_id') is-invalid @enderror">
-                        <option value="">-- Seleccione --</option>
-                        @foreach ($users as $user)
-                            <option value="{{ $user->id }}" @selected((string) old('users_id') === (string) $user->id)>
-                                {{ $user->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('users_id')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
+    <label for="users_id" class="form-label">Vendedor</label>
+    <select name="users_id" id="users_id"
+            class="form-select @error('users_id') is-invalid @enderror">
+        <option value="">-- Seleccione --</option>
+        @foreach ($users as $user)
+            <option value="{{ $user->id }}"
+                @selected((string) old('users_id') === (string) $user->id)>
+                {{ $user->name }}
+            </option>
+        @endforeach
+    </select>
+    @error('users_id')
+        <div class="invalid-feedback">{{ $message }}</div>
+    @enderror
+</div>
             </div>
 
             <h6 class="text-uppercase small text-muted mt-2 mb-2">Medicamentos</h6>
@@ -103,45 +105,62 @@
 
 @push('scripts')
 <script>
-const tbody = document.getElementById('items');
-const template = document.getElementById('item-template').innerHTML;
-let index = {{ count(old('items', [])) }};
+document.addEventListener('DOMContentLoaded', function () {
+    const tbody = document.getElementById('items');
+    const templateEl = document.getElementById('item-template');
+    const addBtn = document.getElementById('add-item');
+    const totalEl = document.getElementById('total');
 
-function recalculate() {
-    let total = 0;
+    if (!tbody || !templateEl || !addBtn) return;
 
-    tbody.querySelectorAll('tr').forEach(row => {
-        const option = row.querySelector('select').selectedOptions[0];
-        const price = parseFloat(option?.dataset.price || 0);
-        const amount = parseInt(row.querySelector('input').value || 0);
-        const subtotal = (isNaN(price) ? 0 : price) * (isNaN(amount) ? 0 : amount);
+    const template = templateEl.innerHTML;
+    let index = {{ count(old('items', [])) }};
 
-        row.querySelector('.price').textContent = 'S/ ' + (isNaN(price) ? 0 : price).toFixed(2);
-        row.querySelector('.subtotal').textContent = 'S/ ' + subtotal.toFixed(2);
-        total += subtotal;
+    function recalculate() {
+        let total = 0;
+        tbody.querySelectorAll('tr').forEach(row => {
+            const select = row.querySelector('select');
+            const input = row.querySelector('input[type="number"]');
+            const option = select ? select.selectedOptions[0] : null;
+            const price = parseFloat(option?.dataset.price || 0);
+            const amount = parseInt(input?.value || 0, 10);
+            const subtotal = (isNaN(price) ? 0 : price) * (isNaN(amount) ? 0 : amount);
+
+            const priceCell = row.querySelector('.price');
+            const subtotalCell = row.querySelector('.subtotal');
+
+            if (priceCell) priceCell.textContent = 'S/ ' + price.toFixed(2);
+            if (subtotalCell) subtotalCell.textContent = 'S/ ' + subtotal.toFixed(2);
+
+            total += subtotal;
+        });
+
+        if (totalEl) totalEl.textContent = 'S/ ' + total.toFixed(2);
+    }
+
+    addBtn.addEventListener('click', () => {
+        tbody.insertAdjacentHTML('beforeend', template.replaceAll('__INDEX__', index));
+        index++;
+        recalculate();
     });
 
-    document.getElementById('total').textContent = 'S/ ' + total.toFixed(2);
-}
+    tbody.addEventListener('click', e => {
+        const removeBtn = e.target.closest('.remove-item');
+        if (removeBtn) {
+            removeBtn.closest('tr').remove();
+            recalculate();
+        }
+    });
 
-document.getElementById('add-item').addEventListener('click', () => {
-    tbody.insertAdjacentHTML('beforeend', template.replaceAll('__INDEX__', index));
-    index++;
-});
+    tbody.addEventListener('change', recalculate);
+    tbody.addEventListener('input', recalculate);
 
-tbody.addEventListener('click', e => {
-    if (e.target.closest('.remove-item')) {
-        e.target.closest('tr').remove();
+    if (index === 0 && tbody.children.length === 0) {
+        addBtn.click();
+    } else {
         recalculate();
     }
 });
 
-tbody.addEventListener('input', recalculate);
-tbody.addEventListener('change', recalculate);
-
-if (index === 0) {
-    document.getElementById('add-item').click();
-}
-recalculate();
 </script>
 @endpush

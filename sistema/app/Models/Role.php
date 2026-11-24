@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['name', 'description'])]
 class Role extends Model
 {
-    // Un rol tiene muchos usuarios
+    
     public function users(): HasMany
     {
         return $this->hasMany(User::class, 'rol_id');
