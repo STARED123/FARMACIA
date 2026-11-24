@@ -8,20 +8,20 @@ use Illuminate\Validation\Rule;
 
 class RoleController extends Controller
 {
-    // READ: listado
+    // Listado de roles
     public function index()
     {
-        $roles = Role::all();
+        $roles = Role::latest()->get();
         return view('settings.roles.index', compact('roles'));
     }
 
-    // Formulario vacío
+    // Formulario para crear
     public function create()
     {
         return view('settings.roles.create');
     }
 
-    // CREATE: validar, guardar, redirigir
+    // Guardar nuevo rol
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -31,40 +31,38 @@ class RoleController extends Controller
 
         Role::create($validated);
 
-        return to_route('roles.index')
-            ->with('ok', 'Rol registrado correctamente.');
+        return to_route('roles.index')->with('ok', 'Rol registrado');
     }
 
-    // Formulario lleno (route model binding)
+    // Formulario para editar
     public function edit(Role $role)
     {
         return view('settings.roles.edit', compact('role'));
     }
 
-    // UPDATE: validar, actualizar, redirigir
+    // Actualizar rol
     public function update(Request $request, Role $role)
     {
+        // ignore(): el nombre no se repite, sin contar el rol que se está editando
         $validated = $request->validate([
-            'name' => [
-                'required',
-                'max:50',
-                Rule::unique('roles', 'name')->ignore($role->id),
-            ],
+            'name' => ['required', 'max:50', Rule::unique('roles')->ignore($role->id)],
             'description' => 'nullable|max:255',
         ]);
 
         $role->update($validated);
 
-        return to_route('roles.index')
-            ->with('ok', 'Rol actualizado correctamente.');
+        return to_route('roles.index')->with('ok', 'Rol actualizado');
     }
 
-    // DELETE: eliminar rol
+    // Eliminar rol (solo si no tiene usuarios)
     public function destroy(Role $role)
     {
+        if ($role->users()->exists()) {
+            return to_route('roles.index')->with('error', 'No se puede eliminar el rol porque tiene usuarios asignados');
+        }
+
         $role->delete();
 
-        return to_route('roles.index')
-            ->with('ok', 'Rol eliminado correctamente.');
+        return to_route('roles.index')->with('ok', 'Rol eliminado');
     }
 }
