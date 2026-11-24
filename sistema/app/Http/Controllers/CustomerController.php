@@ -2,63 +2,71 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Customer;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class CustomerController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // Listado de clientes
     public function index()
     {
-        //
+        $customers = Customer::latest()->get();
+        return view('management.customers.index', compact('customers'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    // Formulario para crear
     public function create()
     {
-        //
+        return view('management.customers.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    // Guardar nuevo cliente
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|max:150',
+            'dni' => 'required|digits:8|unique:customers',
+            'phone' => 'required|digits:9',
+            'age' => 'required|integer|min:0|max:120',
+        ]);
+
+        Customer::create($validated);
+
+        return to_route('customers.index')->with('ok', 'Cliente registrado');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    // Formulario para editar
+    public function edit(Customer $customer)
     {
-        //
+        return view('management.customers.edit', compact('customer'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    // Actualizar cliente
+    public function update(Request $request, Customer $customer)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|max:150',
+            // ignore(): el DNI no se repite, sin contar el cliente que se está editando
+            'dni' => ['required', 'digits:8', Rule::unique('customers')->ignore($customer->id)],
+            'phone' => 'required|digits:9',
+            'age' => 'required|integer|min:0|max:120',
+        ]);
+
+        $customer->update($validated);
+
+        return to_route('customers.index')->with('ok', 'Cliente actualizado');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    // Eliminar cliente (solo si no tiene ventas)
+    public function destroy(Customer $customer)
     {
-        //
-    }
+        if ($customer->sales()->exists()) {
+            return to_route('customers.index')->with('error', 'No se puede eliminar el cliente porque tiene ventas registradas');
+        }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        $customer->delete();
+
+        return to_route('customers.index')->with('ok', 'Cliente eliminado');
     }
 }
