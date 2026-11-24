@@ -2,40 +2,37 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['rol_id', 'name', 'dni', 'phone', 'tuition', 'email', 'password'])]
-#[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use Notifiable;
+
+    protected $fillable = [
+        'rol_id',
+        'name',
+        'dni',
+        'phone',
+        'tuition',
+        'email',
+        'password',
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
 
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed', // la contraseña se encripta sola al guardar
+            'password' => 'hashed',
         ];
     }
 
-    // Un usuario pertenece a un rol
-    public function role(): BelongsTo
+    public function role()
     {
         return $this->belongsTo(Role::class, 'rol_id');
-    }
-
-    // Un usuario registra muchas ventas
-    public function sales(): HasMany
-    {
-        return $this->hasMany(Sale::class);
     }
 }

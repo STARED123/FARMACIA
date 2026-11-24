@@ -8,21 +8,21 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Sale extends Model
 {
-    // 1. Se usa la propiedad estándar de Laravel en lugar del atributo #[Fillable]
+
     protected $fillable = [
-        'customer_id', 
-        'user_id', 
-        'date', 
-        'total', 
-        'igv'
+        'customer_id',
+        'users_id',
+        'date',
+        'total',
+        'igv',
     ];
 
-    // 2. Definición de casts (compatible con Laravel 10 y 11)
+
     protected function casts(): array
     {
         return [
             'date' => 'datetime',
-            'total' => 'decimal:2', 
+            'total' => 'decimal:2',
             'igv' => 'decimal:2',
         ];
     }
@@ -34,19 +34,20 @@ class Sale extends Model
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'users_id');
     }
 
     public function details(): HasMany
     {
-        return $this->hasMany(DetailSale::class);
+        return $this->hasMany(Detail::class, 'sales_id');
     }
 
-    // Diagrama: +calcularTotal(). Los precios ya incluyen el IGV (18 %).
+    
     public function calculateTotal(): float
     {
-        $this->total = round($this->details()->sum('subtotal'), 2);
+        $this->total = round((float) $this->details()->sum('subtotal'), 2);
         $this->igv = round($this->total - ($this->total / 1.18), 2);
+
         return (float) $this->total;
     }
-} // 3. Llave de cierre de la clase agregada aquí
+}

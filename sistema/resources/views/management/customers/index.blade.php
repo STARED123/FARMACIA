@@ -75,6 +75,5 @@
     </div>
 </div>
 @endsection
-```[cite: 38, 39, 40]
 
-¿Ya tienes listo `index.blade.php` para continuar con los demás archivos de clientes o el siguiente paso?
+
