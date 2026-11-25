@@ -5,6 +5,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\MedicineController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\UserController;
@@ -26,4 +27,6 @@ Route::middleware('auth')->group(function () {
     Route::resource('sales', SaleController::class)->except(['edit', 'update']);
     Route::resource('roles', RoleController::class)->except('show');
     Route::resource('users', UserController::class)->except('show');
+
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 });
