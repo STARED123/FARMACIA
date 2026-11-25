@@ -99,11 +99,12 @@
     <div class="dropdown">
         <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle px-2 py-1" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
             <div class="bg-danger rounded-circle d-flex align-items-center justify-content-center me-2 text-white fw-bold small" style="width: 30px; height: 30px;">
-                SJ
+                {{ mb_strtoupper(mb_substr(auth()->user()->name, 0, 2)) }}
             </div>
             <div class="lh-sm">
-                <strong class="d-block small">Administrador</strong>
-                <span class="text-white-50" style="font-size: 11px;">admin@sjb.com</span>
+                <strong class="d-block small">{{ auth()->user()->name }}</strong>
+                <span class="text-white-50" style="font-size: 11px;">{{ auth()->user()->email }}</span>
+                <span class="d-block text-white-50" style="font-size: 11px;">{{ auth()->user()->role->name }}</span>
             </div>
         </a>
         <ul class="dropdown-menu dropdown-menu-dark text-small shadow">

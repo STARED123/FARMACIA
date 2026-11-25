@@ -1,25 +1,33 @@
 <?php
 
 namespace Database\Seeders;
-
+use App\Models\Role;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Crear rol administrador
+        $administrator = Role::firstOrCreate(
+            ['name' => 'administrador'],
+            [
+                'description' => 'Acceso de administración del sistema.'
+            ]
+        );
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Crear usuario administrador
+        User::updateOrCreate(
+            ['email' => 'admin@sanjuan.com'],
+            [
+                'rol_id' => $administrator->id,
+                'name' => 'Administrador',
+                'dni' => '00000001',
+                'phone' => '999999999',
+                'tuition' => null,
+                'password' => bcrypt('password'),
+            ]
+        );
     }
 }
