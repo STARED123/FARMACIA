@@ -27,25 +27,30 @@
                 <span class="small fw-medium">Dashboard</span>
             </a>
         </li>
-        <li class="nav-item">
-            <a href="#" class="nav-link sidebar-link text-white-50 rounded-4 px-3 py-2 d-flex align-items-center gap-2">
-                <i class="bi bi-bar-chart fs-6"></i>
-                <span class="small fw-medium">Reportes</span>
-            </a>
-        </li>
+        @if (auth()->user()->hasRole('Administrador', 'Químico farmacéutico'))
+            <li class="nav-item">
+                <a href="{{ route('reports.index') }}" class="nav-link sidebar-link text-white-50 rounded-4 px-3 py-2 d-flex align-items-center gap-2 {{ request()->is(['reports*']) ? 'active_item' : null }}"
+                   aria-current="{{ request()->is(['reports*']) ? 'page' : null }}">
+                    <i class="bi bi-bar-chart fs-6"></i>
+                    <span class="small fw-medium">Reportes</span>
+                </a>
+            </li>
+        @endif
 
         <!-- SECCIÓN GESTIÓN -->
         <li class="nav-item px-2 pt-3 pb-1">
             <span class="text-uppercase text-white-50 fw-bold" style="font-size: 11px; letter-spacing: 0.5px;">Gestión</span>
         </li>
-        <li class="nav-item">
-            <a href="{{ route('medicines.index') }}" 
-               class="nav-link sidebar-link text-white-50 rounded-4 px-3 py-2 d-flex align-items-center gap-2 {{ request()->is(['medicines*']) ? 'active_item' : null }}"
-               aria-current="{{ request()->is(['medicines*']) ? 'page' : null }}">
-                <i class="bi bi-box-seam fs-6"></i>
-                <span class="small fw-medium">Medicamentos</span>
-            </a>
-        </li>
+        @if (auth()->user()->hasRole('Administrador', 'Químico farmacéutico'))
+            <li class="nav-item">
+                <a href="{{ route('medicines.index') }}" 
+                   class="nav-link sidebar-link text-white-50 rounded-4 px-3 py-2 d-flex align-items-center gap-2 {{ request()->is(['medicines*']) ? 'active_item' : null }}"
+                   aria-current="{{ request()->is(['medicines*']) ? 'page' : null }}">
+                    <i class="bi bi-box-seam fs-6"></i>
+                    <span class="small fw-medium">Medicamentos</span>
+                </a>
+            </li>
+        @endif
         <li class="nav-item">
             <a href="{{ route('customers.index') }}" 
                class="nav-link sidebar-link text-white-50 rounded-4 px-3 py-2 d-flex align-items-center gap-2 {{ request()->is(['customers*']) ? 'active_item' : null }}"
@@ -63,34 +68,36 @@
             </a>
         </li>
 
-        <!-- SECCIÓN CONFIGURACIONES -->
-        <li class="nav-item px-2 pt-3 pb-1">
-            <span class="text-uppercase text-white-50 fw-bold" style="font-size: 11px; letter-spacing: 0.5px;">Configuraciones</span>
-        </li>
-        <li class="nav-item">
-            <a href="{{ route('roles.index') }}" 
-               class="nav-link sidebar-link text-white-50 rounded-4 px-3 py-2 d-flex align-items-center gap-2 {{ request()->is(['roles*']) ? 'active_item' : null }}"
-               aria-current="{{ request()->is(['roles*']) ? 'page' : null }}">
-                <i class="bi bi-shield fs-6"></i>
-                <span class="small fw-medium">Roles</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ route('users.index') }}" 
-               class="nav-link sidebar-link text-white-50 rounded-4 px-3 py-2 d-flex align-items-center gap-2 {{ request()->is(['users*']) ? 'active_item' : null }}"
-               aria-current="{{ request()->is(['users*']) ? 'page' : null }}">
-                <i class="bi bi-person-gear fs-6"></i>
-                <span class="small fw-medium">Usuarios</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ route('categories.index') }}" 
-               class="nav-link sidebar-link text-white-50 rounded-4 px-3 py-2 d-flex align-items-center gap-2 {{ request()->is(['categories*']) ? 'active_item' : null }}"
-               aria-current="{{ request()->is(['categories*']) ? 'page' : null }}">
-                <i class="bi bi-grid fs-6"></i>
-                <span class="small fw-medium">Categorías</span>
-            </a>
-        </li>
+        @if (auth()->user()->hasRole('Administrador'))
+            <!-- SECCIÓN CONFIGURACIONES -->
+            <li class="nav-item px-2 pt-3 pb-1">
+                <span class="text-uppercase text-white-50 fw-bold" style="font-size: 11px; letter-spacing: 0.5px;">Configuraciones</span>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('roles.index') }}" 
+                   class="nav-link sidebar-link text-white-50 rounded-4 px-3 py-2 d-flex align-items-center gap-2 {{ request()->is(['roles*']) ? 'active_item' : null }}"
+                   aria-current="{{ request()->is(['roles*']) ? 'page' : null }}">
+                    <i class="bi bi-shield fs-6"></i>
+                    <span class="small fw-medium">Roles</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('users.index') }}" 
+                   class="nav-link sidebar-link text-white-50 rounded-4 px-3 py-2 d-flex align-items-center gap-2 {{ request()->is(['users*']) ? 'active_item' : null }}"
+                   aria-current="{{ request()->is(['users*']) ? 'page' : null }}">
+                    <i class="bi bi-person-gear fs-6"></i>
+                    <span class="small fw-medium">Usuarios</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('categories.index') }}" 
+                   class="nav-link sidebar-link text-white-50 rounded-4 px-3 py-2 d-flex align-items-center gap-2 {{ request()->is(['categories*']) ? 'active_item' : null }}"
+                   aria-current="{{ request()->is(['categories*']) ? 'page' : null }}">
+                    <i class="bi bi-grid fs-6"></i>
+                    <span class="small fw-medium">Categorías</span>
+                </a>
+            </li>
+        @endif
     </ul>
 
     <hr class="text-secondary">
@@ -110,7 +117,7 @@
         <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
             <li><a class="dropdown-item" href="#">Perfil</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="#">Cerrar sesión</a></li>
+            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">Cerrar sesión</a></li>
         </ul>
     </div>
 </aside>

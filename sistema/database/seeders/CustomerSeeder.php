@@ -12,7 +12,7 @@ class CustomerSeeder extends Seeder
         $faker = fake('es_PE'); // nombres peruanos
 
         for ($i = 0; $i < 40; $i++) {
-            $name = $faker->firstName() . ' ' . $faker->lastName() . ' ' . $faker->lastName();
+            $name = $faker->firstName().' '.$faker->lastName().' '.$faker->lastName();
 
             Customer::create([
                 'name' => mb_substr($name, 0, 50), // la columna admite 50 caracteres

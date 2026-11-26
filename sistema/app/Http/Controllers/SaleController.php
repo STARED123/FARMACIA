@@ -3,10 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
-use App\Models\Detail;
 use App\Models\Medicine;
 use App\Models\Sale;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -16,23 +14,22 @@ class SaleController extends Controller
     public function index()
     {
         $sales = Sale::with(['customer', 'user'])->latest('date')->get();
+
         return view('management.sales.index', compact('sales'));
     }
 
     public function create()
     {
         $customers = Customer::orderBy('name')->get();
-        $users = User::orderBy('name')->get();
         $medicines = Medicine::with('category')->where('amount', '>', 0)->get();
 
-        return view('management.sales.create', compact('customers', 'users', 'medicines'));
+        return view('management.sales.create', compact('customers', 'medicines'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'customer_id' => 'required|exists:customers,id',
-            'users_id' => 'required|exists:users,id',
             'items' => 'required|array|min:1',
             'items.*.medicines_id' => 'required|distinct|exists:medicines,id',
             'items.*.amount' => 'required|integer|min:1',
@@ -44,7 +41,7 @@ class SaleController extends Controller
         $sale = DB::transaction(function () use ($request) {
             $sale = Sale::create([
                 'customer_id' => $request->customer_id,
-                'users_id' => $request->users_id,
+                'users_id' => auth()->id(),
                 'date' => now(),
                 'total' => 0,
                 'igv' => 0,
@@ -57,7 +54,7 @@ class SaleController extends Controller
 
                 if ($medicine->amount < $item['amount']) {
                     throw ValidationException::withMessages([
-                        'items' => "Stock insuficiente para " . ($medicine->category->name ?? 'Medicamento') . " (disponible: {$medicine->amount}).",
+                        'items' => 'Stock insuficiente para '.($medicine->category->name ?? 'Medicamento')." (disponible: {$medicine->amount}).",
                     ]);
                 }
 
@@ -88,6 +85,7 @@ class SaleController extends Controller
     public function show(Sale $sale)
     {
         $sale->load(['customer', 'user', 'details.medicine']);
+
         return view('management.sales.show', compact('sale'));
     }
 

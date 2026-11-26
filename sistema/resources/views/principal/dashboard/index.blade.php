@@ -50,6 +50,19 @@
 </div>
 
 <div class="row g-3">
+    <div class="col-12">
+        <div class="card bg-white border-0 shadow-sm border-5 border-top border-primary">
+            <div class="card-header bg-white">
+                <h6 class="text-uppercase small text-muted mb-0">Ventas de los últimos 12 meses</h6>
+            </div>
+            <div class="card-body">
+                <div style="height: 320px;">
+                    <canvas id="monthly-sales-chart" aria-label="Gráfico de ventas mensuales" role="img"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="col-12 col-lg-7">
         <div class="card bg-white border-0 shadow-sm border-5 border-top border-secondary h-100">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
@@ -117,3 +130,35 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.6.2/dist/chart.umd.min.js"></script>
+    <script>
+        const monthlySalesCanvas = document.getElementById('monthly-sales-chart');
+
+        if (monthlySalesCanvas) {
+            new Chart(monthlySalesCanvas, {
+                type: 'bar',
+                data: {
+                    labels: {{ \Illuminate\Support\Js::from(array_column($monthlySales, 'label')) }},
+                    datasets: [{
+                        label: 'Ventas (S/)',
+                        data: {{ \Illuminate\Support\Js::from(array_column($monthlySales, 'total')) }},
+                        backgroundColor: 'rgba(13, 110, 253, 0.55)',
+                        borderColor: 'rgb(13, 110, 253)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+@endpush

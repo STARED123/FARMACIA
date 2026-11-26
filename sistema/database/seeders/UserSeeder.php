@@ -23,15 +23,17 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($users as $user) {
-            User::create([
-                'role_id' => $roles[$user['role']],
-                'name' => $user['name'],
-                'dni' => $user['dni'],
-                'phone' => $user['phone'],
-                'tuition' => $user['tuition'],
-                'email' => $user['email'],
-                'password' => 'password',
-            ]);
+            User::firstOrCreate(
+                ['email' => $user['email']],
+                [
+                    'rol_id' => $roles[$user['role']],
+                    'name' => $user['name'],
+                    'dni' => $user['dni'],
+                    'phone' => $user['phone'],
+                    'tuition' => $user['tuition'],
+                    'password' => 'password',
+                ],
+            );
         }
     }
 }

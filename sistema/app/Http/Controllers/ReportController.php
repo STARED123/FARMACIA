@@ -2,60 +2,105 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ReportsExport;
 use App\Models\Medicine;
 use App\Models\Sale;
-use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\Response;
 
 class ReportController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): View
     {
-        // Filtro de fechas (por defecto: mes actual)
-        $fechaInicio = $request->input('fecha_inicio', Carbon::now()->startOfMonth()->toDateString());
-        $fechaFin = $request->input('fecha_fin', Carbon::now()->endOfMonth()->toDateString());
+        $this->authorizeReportAccess($request);
 
-        // 1. Ventas en el rango seleccionado
-        $ventas = Sale::with(['user', 'customer'])
-            ->whereBetween(DB::raw('DATE(created_at)'), [$fechaInicio, $fechaFin])
-            ->orderByDesc('created_at')
+        return view('reports.index', $this->reportData($request));
+    }
+
+    public function pdf(Request $request): Response
+    {
+        $this->authorizeReportAccess($request);
+
+        return Pdf::loadView('reports.pdf', $this->reportData($request))
+            ->setPaper('a4', 'landscape')
+            ->download('reporte-farmacia.pdf');
+    }
+
+    public function excel(Request $request): Response
+    {
+        $this->authorizeReportAccess($request);
+        $reportData = $this->reportData($request);
+
+        return Excel::download(
+            new ReportsExport($reportData['sales'], $reportData['inventory']),
+            'reporte-farmacia.xlsx',
+        );
+    }
+
+    private function authorizeReportAccess(Request $request): void
+    {
+        abort_unless(
+            $request->user()?->hasRole('Administrador', 'Químico farmacéutico'),
+            Response::HTTP_FORBIDDEN,
+        );
+    }
+
+    /**
+     * @return array{
+     *     sales: EloquentCollection<int, Sale>,
+     *     inventory: EloquentCollection<int, Medicine>,
+     *     startDate: CarbonImmutable|null,
+     *     endDate: CarbonImmutable|null,
+     *     salesTotal: float
+     * }
+     */
+    private function reportData(Request $request): array
+    {
+        $validated = $request->validate([
+            'start_date' => ['nullable', 'required_with:end_date', 'date'],
+            'end_date' => ['nullable', 'required_with:start_date', 'date', 'after_or_equal:start_date'],
+        ], [
+            'start_date.required_with' => 'Indica ambas fechas para aplicar el filtro.',
+            'end_date.required_with' => 'Indica ambas fechas para aplicar el filtro.',
+            'end_date.after_or_equal' => 'La fecha final debe ser igual o posterior a la fecha inicial.',
+        ]);
+
+        $startDate = isset($validated['start_date'])
+            ? CarbonImmutable::parse($validated['start_date'])
+            : null;
+        $endDate = isset($validated['end_date'])
+            ? CarbonImmutable::parse($validated['end_date'])
+            : null;
+
+        $salesQuery = Sale::query()
+            ->select(['id', 'customer_id', 'users_id', 'date', 'total', 'igv'])
+            ->with(['customer:id,name', 'user:id,name']);
+
+        if ($startDate !== null && $endDate !== null) {
+            $salesQuery->whereBetween('date', [
+                $startDate->startOfDay(),
+                $endDate->endOfDay(),
+            ]);
+        }
+
+        $sales = $salesQuery->latest('date')->get();
+        $inventory = Medicine::query()
+            ->select(['id', 'category_id', 'amount', 'price_unit', 'subtotal'])
+            ->with('category:id,name')
+            ->orderBy('id')
             ->get();
 
-        // 2. KPIs principales
-        $totalIngresos = $ventas->sum('total');
-        $cantidadVentas = $ventas->count();
-        $ticketPromedio = $cantidadVentas > 0 ? $totalIngresos / $cantidadVentas : 0;
-
-        // 3. Top 5 medicamentos más vendidos en el periodo
-        $topMedicamentos = DB::table('details')
-            ->join('sales', 'details.sale_id', '=', 'sales.id')
-            ->join('medicines', 'details.medicine_id', '=', 'medicines.id')
-            ->whereBetween(DB::raw('DATE(sales.created_at)'), [$fechaInicio, $fechaFin])
-            ->select(
-                'medicines.name',
-                DB::raw('SUM(details.quantity) as total_vendido'),
-                DB::raw('SUM(details.subtotal) as total_recaudado')
-            )
-            ->groupBy('medicines.id', 'medicines.name')
-            ->orderByDesc('total_vendido')
-            ->limit(5)
-            ->get();
-
-        // 4. Medicamentos con stock bajo (<= 10 unidades)
-        $stockBajo = Medicine::where('stock', '<=', 10)
-            ->orderBy('stock')
-            ->get();
-
-        return view('reports.index', compact(
-            'fechaInicio',
-            'fechaFin',
-            'ventas',
-            'totalIngresos',
-            'cantidadVentas',
-            'ticketPromedio',
-            'topMedicamentos',
-            'stockBajo'
-        ));
+        return [
+            'sales' => $sales,
+            'inventory' => $inventory,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+            'salesTotal' => (float) $sales->sum('total'),
+        ];
     }
 }

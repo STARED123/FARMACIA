@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="San Juan – Sistema de Venta de Medicamentos">
   <title>FARM SJB | Iniciar sesión</title>
+  @include('partials.pwa-head')
   <link rel="stylesheet" href="{{ asset('css/bootstrap.css') }}">
   <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
 </head>
@@ -13,7 +14,6 @@
 
 <main class="login-wrapper d-flex">
 
-  <!-- Panel de marca -->
   <section class="login-brand bg-dark text-white d-none d-lg-flex flex-column justify-content-between p-5" aria-hidden="true">
 
     <div class="d-flex align-items-center">
@@ -44,7 +44,6 @@
     </ul>
   </section>
 
-  <!-- Formulario -->
   <section class="flex-grow-1 d-flex align-items-center justify-content-center p-4">
     <div class="login-card w-100">
 
@@ -60,47 +59,46 @@
         <p class="text-secondary small mb-0">Ingresa tus credenciales para continuar.</p>
       </div>
 
+      <button type="button" class="btn btn-outline-primary btn-sm mb-3" data-pwa-install hidden>
+        Instalar aplicación
+      </button>
+
       @if (session('ok'))
-        <div class="alert alert-success small py-2" role="alert">
-          <i class="bi bi-check-circle me-1"></i> {{ session('ok') }}
+        <div class="alert alert-success small py-2" role="status">
+          <i class="bi bi-check-circle me-1"></i>{{ session('ok') }}
         </div>
       @endif
 
       @error('email')
         <div class="alert alert-danger small py-2" role="alert">
-          <i class="bi bi-exclamation-circle me-1"></i> {{ $message }}
+          <i class="bi bi-exclamation-circle me-1"></i>{{ $message }}
         </div>
       @enderror
 
-      <form method="POST" action="{{ route('login') }}" class="needs-validation">
+      <form action="{{ route('login') }}" method="POST" class="needs-validation">
         @csrf
 
         <div class="mb-3">
-          <label for="loginUser" class="form-label small fw-semibold text-dark">Correo electrónico</label>
+          <label for="loginEmail" class="form-label small fw-semibold text-dark">Correo electrónico</label>
           <div class="input-group has-validation login-input-group">
             <span class="input-group-text bg-white"><i class="bi bi-person text-secondary"></i></span>
-            <input type="email" id="loginUser" name="email" value="{{ old('email') }}"
-                   class="form-control border-start-0" placeholder="usuario@sanjuan.com"
-                   autocomplete="username" required>
+            <input type="email" id="loginEmail" name="email" value="{{ old('email') }}"
+                   class="form-control border-start-0 @error('email') is-invalid @enderror"
+                   placeholder="usuario@sanjuan.com" autocomplete="username" required>
           </div>
         </div>
 
         <div class="mb-3">
           <div class="d-flex justify-content-between align-items-center">
             <label for="loginPassword" class="form-label small fw-semibold text-dark">Contraseña</label>
-            <a href="#" class="small text-primary text-decoration-none mb-2">¿Olvidaste tu contraseña?</a>
           </div>
           <div class="input-group has-validation login-input-group">
             <span class="input-group-text bg-white"><i class="bi bi-lock text-secondary"></i></span>
-            <input type="password" id="loginPassword" name="password"
-                   class="form-control border-start-0 border-end-0" placeholder="••••••••"
-                   autocomplete="current-password" required>
+            <input type="password" id="loginPassword" name="password" class="form-control border-start-0 border-end-0"
+                   placeholder="••••••••" autocomplete="current-password" required>
             <button type="button" id="togglePassword" class="input-group-text bg-white" aria-label="Mostrar contraseña">
               <i class="bi bi-eye text-secondary"></i>
             </button>
-            @error('password')
-              <div class="invalid-feedback d-block">{{ $message }}</div>
-            @enderror
           </div>
         </div>
 
@@ -123,22 +121,27 @@
 
 <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
 <script>
-  const togglePassword = document.getElementById('togglePassword');
-  const password = document.getElementById('loginPassword');
+document.addEventListener('DOMContentLoaded', function () {
+    const password = document.getElementById('loginPassword');
+    const togglePassword = document.getElementById('togglePassword');
+    const form = document.querySelector('.login-card form');
+    const submitButton = document.getElementById('loginSubmit');
 
-  togglePassword.addEventListener('click', () => {
-    const visible = password.type === 'text';
-    password.type = visible ? 'password' : 'text';
-    togglePassword.setAttribute('aria-label', visible ? 'Mostrar contraseña' : 'Ocultar contraseña');
-    togglePassword.querySelector('i').className = `bi ${visible ? 'bi-eye' : 'bi-eye-slash'} text-secondary`;
-  });
+    togglePassword.addEventListener('click', function () {
+        const showPassword = password.type === 'password';
+        password.type = showPassword ? 'text' : 'password';
+        togglePassword.setAttribute('aria-label', showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña');
+        togglePassword.querySelector('i').className = showPassword
+            ? 'bi bi-eye-slash text-secondary'
+            : 'bi bi-eye text-secondary';
+    });
 
-  document.querySelector('.login-card form').addEventListener('submit', () => {
-    const submit = document.getElementById('loginSubmit');
-    submit.disabled = true;
-    submit.querySelector('.spinner-border').classList.remove('d-none');
-    submit.querySelector('.btn-label').textContent = 'Ingresando...';
-  });
+    form.addEventListener('submit', function () {
+        submitButton.disabled = true;
+        submitButton.querySelector('.spinner-border').classList.remove('d-none');
+        submitButton.querySelector('.btn-label').textContent = 'Ingresando...';
+    });
+});
 </script>
 </body>
 </html>

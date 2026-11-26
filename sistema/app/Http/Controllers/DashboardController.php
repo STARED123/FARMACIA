@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\Medicine;
 use App\Models\Sale;
+use Illuminate\Support\Facades\DB;
+use LogicException;
 
 class DashboardController extends Controller
 {
@@ -30,6 +32,31 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        $periodStart = now()->startOfMonth()->subMonths(11);
+        $periodEnd = now()->endOfMonth();
+        $monthExpression = match (DB::connection()->getDriverName()) {
+            'mysql' => "DATE_FORMAT(date, '%Y-%m')",
+            'sqlite' => "strftime('%Y-%m', date)",
+            default => throw new LogicException('El gráfico de ventas no admite este motor de base de datos.'),
+        };
+        $salesByMonth = Sale::query()
+            ->whereBetween('date', [$periodStart, $periodEnd])
+            ->selectRaw("$monthExpression as month, SUM(total) as total")
+            ->groupBy('month')
+            ->pluck('total', 'month');
+
+        $monthlySales = [];
+
+        foreach (range(0, 11) as $monthOffset) {
+            $month = $periodStart->copy()->addMonths($monthOffset);
+            $monthKey = $month->format('Y-m');
+
+            $monthlySales[] = [
+                'label' => $month->format('m/Y'),
+                'total' => (float) ($salesByMonth[$monthKey] ?? 0),
+            ];
+        }
+
         return view('principal.dashboard.index', compact(
             'salesToday',
             'salesMonth',
@@ -37,7 +64,8 @@ class DashboardController extends Controller
             'medicinesCount',
             'lowStockCount',
             'lowStockMedicines',
-            'recentSales'
+            'recentSales',
+            'monthlySales',
         ));
     }
 }

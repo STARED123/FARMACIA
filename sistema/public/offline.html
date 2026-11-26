@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0d6efd">
+    <title>Sin conexión | Farmacia San Juan</title>
+    <style>
+        :root { color-scheme: light; font-family: system-ui, sans-serif; }
+        body { min-height: 100vh; margin: 0; display: grid; place-items: center; background: #f8f9fa; color: #212529; }
+        main { max-width: 28rem; padding: 2rem; text-align: center; }
+        h1 { margin-bottom: .5rem; }
+        p { color: #5c636a; line-height: 1.5; }
+        button { padding: .65rem 1rem; border: 0; border-radius: .5rem; background: #0d6efd; color: white; font: inherit; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>Estás sin conexión</h1>
+        <p>Conéctate a internet para volver a usar las ventas y el inventario. Por seguridad, los datos de tu sesión no se guardan sin conexión.</p>
+        <button type="button" onclick="window.location.reload()">Volver a intentar</button>
+    </main>
+</body>
+</html>

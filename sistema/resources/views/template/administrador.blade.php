@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="San Juan – Sistema de Venta de Medicamentos">
     <title>FARM SJB | @yield('title')</title>
+    @include('partials.pwa-head')
     <link rel="stylesheet" href="{{ asset('css/bootstrap.css') }}">
     <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
 </head>
@@ -20,19 +21,24 @@
                 <div class="d-flex align-items-center justify-content-between flex-column flex-sm-row gap-2 mb-4">
                     <p class="text-secondary mb-0">@yield('description')</p>
 
-                    <nav aria-label="Ruta de navegación">
-                        <ol class="breadcrumb mb-0 small">
-                            <li class="breadcrumb-item"><span>@yield('item_section')</span></li>
-                            <li class="breadcrumb-item text-muted fw-medium" aria-current="page">
-                                <a href="@yield('route_section')" class="text-decoration-none text-secondary">
-                                    @yield('section')
-                                </a>
-                            </li>
-                            <li class="breadcrumb-item">
-                                <span class="text-secondary">@yield('module')</span>
-                            </li>
-                        </ol>
-                    </nav>
+                    <div class="d-flex align-items-center gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-pwa-install hidden>
+                            Instalar aplicación
+                        </button>
+                        <nav aria-label="Ruta de navegación">
+                            <ol class="breadcrumb mb-0 small">
+                                <li class="breadcrumb-item"><span>@yield('item_section')</span></li>
+                                <li class="breadcrumb-item text-muted fw-medium" aria-current="page">
+                                    <a href="@yield('route_section')" class="text-decoration-none text-secondary">
+                                        @yield('section')
+                                    </a>
+                                </li>
+                                <li class="breadcrumb-item">
+                                    <span class="text-secondary">@yield('module')</span>
+                                </li>
+                            </ol>
+                        </nav>
+                    </div>
                 </div>
 
                 @yield('content')

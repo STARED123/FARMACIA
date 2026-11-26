@@ -20,6 +20,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard.index');
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/pdf', [ReportController::class, 'pdf'])->name('reports.pdf');
+    Route::get('/reports/excel', [ReportController::class, 'excel'])->name('reports.excel');
 
     Route::resource('categories', CategoryController::class)->except('show');
     Route::resource('medicines', MedicineController::class)->except('show');
@@ -27,6 +30,4 @@ Route::middleware('auth')->group(function () {
     Route::resource('sales', SaleController::class)->except(['edit', 'update']);
     Route::resource('roles', RoleController::class)->except('show');
     Route::resource('users', UserController::class)->except('show');
-
-    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 });
