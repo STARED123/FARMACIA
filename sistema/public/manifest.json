@@ -1,12 +1,14 @@
 {
-    "id": "./",
+    "id": "/",
     "name": "Sistema de Farmacia San Juan",
     "short_name": "Farmacia SJB",
     "description": "Sistema de ventas e inventario de la Farmacia San Juan.",
     "lang": "es",
-    "start_url": "./",
-    "scope": "./",
+    "start_url": "/",
+    "scope": "/",
     "display": "standalone",
+    "orientation": "portrait-primary",
+    "categories": ["business", "productivity", "medical"],
     "background_color": "#f8f9fa",
     "theme_color": "#0d6efd",
     "icons": [

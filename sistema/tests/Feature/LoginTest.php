@@ -11,12 +11,28 @@ class LoginTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_pwa_manifest_references_existing_install_assets(): void
+    {
+        $manifest = json_decode(file_get_contents(public_path('manifest.json')), true);
+
+        $this->assertSame('Sistema de Farmacia San Juan', $manifest['name']);
+        $this->assertSame('standalone', $manifest['display']);
+        $this->assertFileExists(public_path('icons/icon-192.png'));
+        $this->assertFileExists(public_path('icons/icon-512.png'));
+        $this->assertSame(192, getimagesize(public_path('icons/icon-192.png'))[0]);
+        $this->assertSame(512, getimagesize(public_path('icons/icon-512.png'))[0]);
+    }
+
     public function test_login_form_shows_the_prototype_and_session_message(): void
     {
         $this->withSession(['ok' => 'Cerraste sesión correctamente.'])
             ->get(route('login'))
             ->assertOk()
             ->assertViewIs('auth.login')
+            ->assertSee('href="'.asset('manifest.json').'"', false)
+            ->assertSee('name="theme-color"', false)
+            ->assertSee('data-service-worker-url="'.asset('sw.js').'"', false)
+            ->assertSee('data-pwa-install', false)
             ->assertSee('action="'.route('login').'" method="POST"', false)
             ->assertSee('name="email"', false)
             ->assertSee('name="password"', false)

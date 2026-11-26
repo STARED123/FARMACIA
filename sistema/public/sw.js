@@ -1,4 +1,4 @@
-const CACHE_NAME = 'farmacia-sjb-shell-v1';
+const CACHE_NAME = 'farmacia-sjb-shell-v2';
 const APP_SCOPE = self.registration.scope;
 const STATIC_ASSETS = [
     'manifest.json',
@@ -7,6 +7,8 @@ const STATIC_ASSETS = [
     'css/custom.css',
     'js/bootstrap.bundle.min.js',
     'js/app.js',
+    'js/pwa.js',
+    'favicon.ico',
     'icons/icon-192.png',
     'icons/icon-512.png',
 ].map((assetPath) => new URL(assetPath, APP_SCOPE).href);
@@ -15,7 +17,18 @@ const OFFLINE_PAGE = new URL('offline.html', APP_SCOPE).href;
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME)
-            .then((cache) => cache.addAll(STATIC_ASSETS))
+            .then(async (cache) => {
+                await Promise.all(STATIC_ASSETS.map(async (assetUrl) => {
+                    try {
+                        const response = await fetch(assetUrl);
+                        if (response.ok) {
+                            await cache.put(assetUrl, response);
+                        }
+                    } catch (error) {
+                        console.warn('No se pudo guardar el recurso PWA:', assetUrl, error);
+                    }
+                }));
+            })
             .then(() => self.skipWaiting())
     );
 });
@@ -42,7 +55,8 @@ self.addEventListener('fetch', (event) => {
 
     if (request.mode === 'navigate') {
         event.respondWith(
-            fetch(request).catch(() => caches.match(OFFLINE_PAGE))
+            fetch(request)
+                .catch(() => caches.match(request).then((cachedPage) => cachedPage || caches.match(OFFLINE_PAGE)))
         );
 
         return;

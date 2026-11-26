@@ -12,6 +12,15 @@
 
 <body>
 
+<button
+    type="button"
+    class="btn btn-outline-primary bg-white position-fixed top-0 end-0 m-3 shadow-sm"
+    data-pwa-install
+    hidden
+>
+  Instalar aplicación
+</button>
+
 <main class="login-wrapper d-flex">
 
   <section class="login-brand bg-dark text-white d-none d-lg-flex flex-column justify-content-between p-5" aria-hidden="true">
